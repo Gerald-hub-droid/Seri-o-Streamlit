@@ -17,7 +17,7 @@ st.set_page_config(
 # MAIN HEADER
 # =====================================
 
-st.header("YOUR FULL NAME")
+st.header("Gerald Brandon A. Seriño")
 
 st.title("📚 Student Productivity Dashboard")
 
