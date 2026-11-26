@@ -125,62 +125,99 @@ div[data-testid="stMetric"] {
 }
 
 /* ==========================================
-   SIDEBAR DESIGN
+   PREMIUM SIDEBAR DESIGN
 ========================================== */
 
 section[data-testid="stSidebar"] {
     background: linear-gradient(
-        180deg,
-        #0f172a 0%,
-        #172554 55%,
+        160deg,
+        #0b1120 0%,
+        #14264a 55%,
         #1e3a5f 100%
     );
+    border-right: 2px solid #2563eb;
 }
 
-/* SIDEBAR TEXT */
+/* Sidebar content spacing */
 
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] label {
-    color: #e2e8f0;
+section[data-testid="stSidebar"] .block-container {
+    padding-top: 2rem;
 }
 
-/* SIDEBAR TITLE */
+/* Sidebar title */
 
 section[data-testid="stSidebar"] h1 {
     color: #ffffff;
+    font-size: 23px;
     font-weight: 800;
+    letter-spacing: 0.5px;
 }
 
-/* SIDEBAR CAPTION */
+/* Sidebar caption */
 
 section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
-    color: #93c5fd;
+    color: #38bdf8;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
 }
 
-/* NAVIGATION BUTTONS */
-
-section[data-testid="stSidebar"] .stButton > button {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-    border: 1px solid rgba(147, 197, 253, 0.25);
-    border-radius: 10px;
-    transition: all 0.3s ease;
-}
-
-/* BUTTON HOVER EFFECT */
-
-section[data-testid="stSidebar"] .stButton > button:hover {
-    background: #2563eb;
-    color: #ffffff;
-    border: 1px solid #60a5fa;
-    transform: translateX(4px);
-}
-
-/* SIDEBAR DIVIDER */
+/* Sidebar divider */
 
 section[data-testid="stSidebar"] hr {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(56, 189, 248, 0.3);
+    margin: 18px 0;
+}
+
+/* Navigation buttons */
+
+section[data-testid="stSidebar"] .stButton > button {
+    background: rgba(255, 255, 255, 0.07);
+    color: #e2e8f0;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 12px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    transition: all 0.25s ease;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Navigation hover */
+
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background: linear-gradient(
+        90deg,
+        #1d4ed8,
+        #2563eb
+    );
+    color: white;
+    border: 1px solid #38bdf8;
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Button focus */
+
+section[data-testid="stSidebar"] .stButton > button:focus {
+    color: white;
+    border: 1px solid #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+}
+
+/* Logout button */
+
+section[data-testid="stSidebar"] .stButton:last-of-type > button {
+    background: rgba(220, 38, 38, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    color: #fca5a5;
+}
+
+section[data-testid="stSidebar"] .stButton:last-of-type > button:hover {
+    background: #dc2626;
+    color: white;
+    border-color: #f87171;
 }
 
 </style>
