@@ -331,7 +331,7 @@ def home_page():
 
     col1, col2, col3 = st.columns(3)
 
-    col1.metric("Year Level", "Sophomore (2nd Year)")
+    col1.metric("Year Level", "2nd Year")
     col2.metric("Program", "BSME")
     col3.metric("Section", "BSME-2B")
 
@@ -346,7 +346,6 @@ def home_page():
 
     Explore the different sections using the navigation menu.
     """)
-
 
 # ==========================================
 # ABOUT ME
