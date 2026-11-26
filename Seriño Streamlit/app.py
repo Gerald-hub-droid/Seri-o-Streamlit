@@ -765,7 +765,7 @@ elif st.session_state.screen == "main":
 # SETTINGS PAGE
 # ==========================================
 
-    elif page == "Settings":
+elif page == "Settings":
 
         if not is_admin():
 
