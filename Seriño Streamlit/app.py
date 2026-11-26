@@ -30,7 +30,7 @@ html, body, [class*="css"] {
     background: #f4f6fa;
 }
 
-#MainMenu, footer, header {
+#MainMenu, footer {
     visibility: hidden;
 }
 
