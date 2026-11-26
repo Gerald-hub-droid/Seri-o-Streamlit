@@ -356,16 +356,32 @@ def developer_page():
         unsafe_allow_html=True
     )
 
-    with st.container(border=True):
+    # Profile Picture and Name
+    col1, col2 = st.columns([1, 3])
 
+    with col1:
+        profile_path = Path(__file__).parent / "profile.jpg"
+
+        if profile_path.exists():
+            image = Image.open(profile_path)
+            st.image(image, width=180)
+        else:
+            st.warning("Profile picture not found.")
+
+    with col2:
         st.markdown(
             f"<h2 style='color:#172554;'>{NAME}</h2>",
             unsafe_allow_html=True
         )
-
         st.caption("Application Owner and Developer")
+        st.write("Aspiring Mechanical Engineer | Technology Enthusiast")
 
-        st.divider()
+    st.divider()
+
+    # Academic Information
+    with st.container(border=True):
+
+        st.subheader("Academic Information")
 
         st.markdown("**UNIVERSITY**")
         st.write(UNIVERSITY)
@@ -382,6 +398,7 @@ def developer_page():
         st.markdown("**SECTION**")
         st.write(SECTION)
 
+    # Contact Information
     st.subheader("Contact Information")
 
     col1, col2 = st.columns(2)
@@ -396,7 +413,6 @@ def developer_page():
     with col2:
         st.markdown("**📧 Alternative Email**")
         st.write(ALT_EMAIL)
-
 
 # ==========================================
 # MAIN APPLICATION
