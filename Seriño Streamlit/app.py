@@ -1,152 +1,197 @@
-
 import streamlit as st
-from pathlib import Path
 
 st.set_page_config(
     page_title="Gerald | Personal Portfolio",
-    page_icon="",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
-# Application paths
-BASE_DIR = Path(__file__).parent
-PROFILE_IMAGE = BASE_DIR / "assets" / "profile.jpg"
+# ==========================================
+# OWNER ACCOUNT
+# ==========================================
 
-# Student information
-NAME = "Gerald Brandon Angus Seriño"
-EMAIL = "serinogeraldbrandon@gmail.com"
+OWNER_EMAIL = st.secrets["owner_email"].lower().strip()
+OWNER_PASSWORD = st.secrets["owner_password"]
+
+# ==========================================
+# PERSONAL INFORMATION
+# ==========================================
+
+DEFAULT_NAME = "Gerald Brandon Angus Seriño"
+DEFAULT_EMAIL = "serinogeraldbrandon@gmail.com"
+
+BIRTHDAY = "August 09, 2007"
 PROGRAM = "Bachelor of Science in Mechanical Engineering"
-UNIVERSITY = "North Eastern Mindanao State University - Bislig Campus"
+
+UNIVERSITY = (
+    "North Eastern Mindanao State University - Bislig Campus"
+)
+
+YEAR_LEVEL = "2nd Year"
 SECTION = "BSME 2B"
 
-# Custom styling
-st.markdown("""
+# ==========================================
+# SESSION STATE
+# ==========================================
+
+defaults = {
+    "screen": "intro",
+    "authenticated": False,
+    "current_user": None,
+    "accounts": {},
+    "profile_name": DEFAULT_NAME,
+    "profile_email": DEFAULT_EMAIL,
+    "profile_picture": None,
+    "theme": "Light"
+}
+
+for key, value in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
+
+if OWNER_EMAIL not in st.session_state.accounts:
+    st.session_state.accounts[OWNER_EMAIL] = {
+        "password": OWNER_PASSWORD,
+        "role": "Owner"
+    }
+
+# ==========================================
+# THEMES
+# ==========================================
+
+themes = {
+    "Light": {
+        "background": "#FFFFFF",
+        "surface": "#F4F4F4",
+        "text": "#111111",
+        "sidebar": "#EEEEEE",
+        "border": "#DDDDDD"
+    },
+    "Dark": {
+        "background": "#171717",
+        "surface": "#242424",
+        "text": "#FFFFFF",
+        "sidebar": "#202020",
+        "border": "#444444"
+    },
+    "Gray": {
+        "background": "#DCDCDC",
+        "surface": "#EEEEEE",
+        "text": "#222222",
+        "sidebar": "#C9C9C9",
+        "border": "#BBBBBB"
+    },
+    "OLED Black": {
+        "background": "#000000",
+        "surface": "#111111",
+        "text": "#FFFFFF",
+        "sidebar": "#080808",
+        "border": "#333333"
+    }
+}
+
+theme = themes[st.session_state.theme]
+
+# ==========================================
+# CUSTOM CSS
+# ==========================================
+
+st.markdown(f"""
 <style>
-.stApp {
-    background: #F4F6FA;
-}
+.stApp {{
+    background-color: {theme['background']};
+    color: {theme['text']};
+}}
 
-section[data-testid="stSidebar"] {
-    background: #172B4D;
-}
+section[data-testid="stSidebar"] {{
+    background-color: {theme['sidebar']};
+}}
 
-section[data-testid="stSidebar"] * {
-    color: white;
-}
+h1, h2, h3 {{
+    color: {theme['text']} !important;
+}}
 
-section[data-testid="stSidebar"] hr {
-    border-color: #52647C;
-}
+.stButton button {{
+    border-radius: 8px;
+    min-height: 42px;
+    font-weight: 600;
+}}
 
-.block-container {
-    padding-top: 2rem;
-    max-width: 1400px;
-}
+hr {{
+    border-color: {theme['border']};
+}}
 
-h1, h2, h3 {
-    color: #172B4D;
-}
-
-div[data-testid="stVerticalBlockBorderWrapper"] {
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #E2E8F0;
-}
-
-.footer {
+.footer {{
     text-align: center;
-    color: #64748B;
     padding: 20px;
     font-size: 12px;
-}
+}}
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar
-with st.sidebar:
+# ==========================================
+# FUNCTIONS
+# ==========================================
 
-    st.markdown("## GERALD")
-    st.caption("PERSONAL PORTFOLIO")
+def logout():
+    st.session_state.authenticated = False
+    st.session_state.current_user = None
+    st.session_state.screen = "intro"
+    st.rerun()
 
-    st.divider()
 
-    if PROFILE_IMAGE.exists():
-        st.image(str(PROFILE_IMAGE), width=150)
-    else:
-        st.info("Upload your profile picture in Settings.")
+def get_role():
+    if not st.session_state.authenticated:
+        return None
 
-    st.markdown(f"### {NAME}")
-    st.caption("Mechanical Engineering Student")
-    st.caption(SECTION)
+    account = st.session_state.accounts.get(
+        st.session_state.current_user
+    )
 
-    st.divider()
+    return account["role"] if account else None
 
-    st.markdown("### CONTACT")
-    st.caption(EMAIL)
 
-    st.divider()
+def is_owner():
+    return get_role() == "Owner"
 
-    st.markdown("### APPLICATION")
-    st.caption("Student Portfolio")
-    st.caption("Version 1.0.0")
 
-# Main page
-st.title("Welcome to My Portfolio")
+def is_admin():
+    return get_role() in ["Owner", "Administrator"]
 
-st.write(
-    "A personal space showcasing my profile, "
-    "educational background, and academic journey."
-)
 
-st.divider()
+def show_clock():
+    st.components.v1.html("""
+    <div style="font-family:Arial;text-align:right;">
+        <div id="clock" style="font-size:24px;font-weight:bold;"></div>
+        <div id="date" style="font-size:13px;"></div>
+        <div style="font-size:12px;">
+            Asia/Manila (UTC+08:00)
+        </div>
+    </div>
 
-col1, col2, col3 = st.columns(3)
+    <script>
+    function updateClock() {
+        const now = new Date();
 
-with col1:
-    with st.container(border=True):
-        st.caption("YEAR LEVEL")
-        st.subheader("2nd Year")
+        document.getElementById("clock").textContent =
+            new Intl.DateTimeFormat("en-US", {
+                timeZone: "Asia/Manila",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
+            }).format(now);
 
-with col2:
-    with st.container(border=True):
-        st.caption("PROGRAM")
-        st.subheader("BSME")
+        document.getElementById("date").textContent =
+            new Intl.DateTimeFormat("en-US", {
+                timeZone: "Asia/Manila",
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            }).format(now);
+    }
 
-with col3:
-    with st.container(border=True):
-        st.caption("SECTION")
-        st.subheader("BSME 2B")
-
-st.divider()
-
-st.header("About Me")
-
-st.write(
-    f"""
-    I am **{NAME}**, currently pursuing
-    **{PROGRAM}** at **{UNIVERSITY}**.
-
-    I am a second-year student under section
-    **{SECTION}**.
-    """
-)
-
-st.divider()
-
-st.header("Explore My Portfolio")
-
-st.write(
-    "Use the navigation menu in the sidebar to "
-    "view my personal information, educational "
-    "background, and application settings."
-)
-
-st.markdown("---")
-
-st.markdown(
-    '<div class="footer">'
-    'Developed by Gerald Brandon Angus Seriño'
-    '</div>',
-    unsafe_allow_html=True
-)
+    updateClock();
+    setInterval(updateClock, 1000);
+    </script>
+    """, height=75)
