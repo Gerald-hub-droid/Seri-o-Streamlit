@@ -345,7 +345,6 @@ def education_page():
         </div>
         """, unsafe_allow_html=True)
 
-
 # ==========================================
 # DEVELOPER PROFILE
 # ==========================================
@@ -357,33 +356,46 @@ def developer_page():
         unsafe_allow_html=True
     )
 
-    st.markdown(f"""
-    <div class="profile-card">
-        <h2 style="color:#172554;">{NAME}</h2>
-        <p style="color:#64748b;">Application Owner and Developer</p>
-        <hr>
-        <div class="info-label">University</div>
-        <p class="info-value">{UNIVERSITY}</p>
+    with st.container(border=True):
 
-        <div class="info-label">Campus</div>
-        <p class="info-value">{CAMPUS}</p>
+        st.markdown(
+            f"<h2 style='color:#172554;'>{NAME}</h2>",
+            unsafe_allow_html=True
+        )
 
-        <div class="info-label">Program</div>
-        <p class="info-value">{COURSE}</p>
+        st.caption("Application Owner and Developer")
 
-        <div class="info-label">Year Level</div>
-        <p class="info-value">{YEAR_LEVEL}</p>
+        st.divider()
 
-        <div class="info-label">Section</div>
-        <p class="info-value">{SECTION}</p>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("**UNIVERSITY**")
+        st.write(UNIVERSITY)
+
+        st.markdown("**CAMPUS**")
+        st.write(CAMPUS)
+
+        st.markdown("**PROGRAM**")
+        st.write(COURSE)
+
+        st.markdown("**YEAR LEVEL**")
+        st.write(YEAR_LEVEL)
+
+        st.markdown("**SECTION**")
+        st.write(SECTION)
 
     st.subheader("Contact Information")
 
-    st.write(f"📧 Primary Email: {EMAIL}")
-    st.write(f"📧 Alternative Email: {ALT_EMAIL}")
-    st.write(f"📱 Contact Number: {PHONE}")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("**📧 Primary Email**")
+        st.write(EMAIL)
+
+        st.markdown("**📱 Contact Number**")
+        st.write(PHONE)
+
+    with col2:
+        st.markdown("**📧 Alternative Email**")
+        st.write(ALT_EMAIL)
 
 
 # ==========================================
