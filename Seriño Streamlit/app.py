@@ -1,1122 +1,418 @@
+
 import streamlit as st
+from PIL import Image
+from pathlib import Path
+
+# ==========================================
+# PAGE CONFIGURATION
+# ==========================================
 
 st.set_page_config(
-    page_title="Gerald | Personal Portfolio",
-    layout="wide"
+    page_title="Gerald Brandon Angus Seriño",
+    page_icon="⚙️",
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
-
-# ==========================================
-# OWNER ACCOUNT
-# ==========================================
-
-OWNER_EMAIL = st.secrets["owner_email"].lower().strip()
-OWNER_PASSWORD = st.secrets["owner_password"]
-
-# ==========================================
-# PERSONAL INFORMATION
-# ==========================================
-
-DEFAULT_NAME = "Gerald Brandon Angus Seriño"
-DEFAULT_EMAIL = "serinogeraldbrandon@gmail.com"
-
-BIRTHDAY = "August 09, 2007"
-PROGRAM = "Bachelor of Science in Mechanical Engineering"
-
-UNIVERSITY = (
-    "North Eastern Mindanao State University - Bislig Campus"
-)
-
-YEAR_LEVEL = "2nd Year"
-SECTION = "BSME 2B"
-
-# ==========================================
-# SESSION STATE
-# ==========================================
-
-defaults = {
-    "screen": "intro",
-    "authenticated": False,
-    "current_user": None,
-    "accounts": {},
-    "profile_name": DEFAULT_NAME,
-    "profile_email": DEFAULT_EMAIL,
-    "profile_picture": None,
-    "theme": "Light"
-}
-
-for key, value in defaults.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
-
-if OWNER_EMAIL not in st.session_state.accounts:
-    st.session_state.accounts[OWNER_EMAIL] = {
-        "password": OWNER_PASSWORD,
-        "role": "Owner"
-    }
-
-# ==========================================
-# THEMES
-# ==========================================
-
-themes = {
-    "Light": {
-        "background": "#FFFFFF",
-        "surface": "#F4F4F4",
-        "text": "#111111",
-        "sidebar": "#EEEEEE",
-        "border": "#DDDDDD"
-    },
-    "Dark": {
-        "background": "#171717",
-        "surface": "#242424",
-        "text": "#FFFFFF",
-        "sidebar": "#202020",
-        "border": "#444444"
-    },
-    "Gray": {
-        "background": "#DCDCDC",
-        "surface": "#EEEEEE",
-        "text": "#222222",
-        "sidebar": "#C9C9C9",
-        "border": "#BBBBBB"
-    },
-    "OLED Black": {
-        "background": "#000000",
-        "surface": "#111111",
-        "text": "#FFFFFF",
-        "sidebar": "#080808",
-        "border": "#333333"
-    }
-}
-
-theme = themes[st.session_state.theme]
 
 # ==========================================
 # CUSTOM CSS
 # ==========================================
 
-st.markdown(f"""
+st.markdown("""
 <style>
-.stApp {{
-    background-color: {theme['background']};
-    color: {theme['text']};
-}}
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
-section[data-testid="stSidebar"] {{
-    background-color: {theme['sidebar']};
-}}
+html, body, [class*="css"] {
+    font-family: 'Poppins', sans-serif;
+}
 
-h1, h2, h3 {{
-    color: {theme['text']} !important;
-}}
+.stApp {
+    background: #f4f6fa;
+}
 
-.stButton button {{
-    border-radius: 8px;
-    min-height: 42px;
-    font-weight: 600;
-}}
+#MainMenu, footer, header {
+    visibility: hidden;
+}
 
-hr {{
-    border-color: {theme['border']};
-}}
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    max-width: 1150px;
+}
 
-.footer {{
+.hero {
+    background: linear-gradient(135deg, #0f172a, #172554, #334155);
+    padding: 65px 30px;
+    border-radius: 25px;
     text-align: center;
-    padding: 20px;
+    color: white;
+    margin-bottom: 25px;
+}
+
+.hero h1 {
+    font-size: 38px;
+    font-weight: 800;
+    color: white;
+}
+
+.hero p {
+    color: #cbd5e1;
+    font-size: 15px;
+}
+
+.section-title {
+    color: #172554;
+    font-weight: 700;
+    font-size: 28px;
+    margin-bottom: 15px;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 18px;
+    padding: 25px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 15px;
+}
+
+.info-label {
+    color: #64748b;
     font-size: 12px;
-}}
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.info-value {
+    color: #172554;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.timeline {
+    border-left: 3px solid #334155;
+    padding: 5px 0 5px 22px;
+    margin: 15px 0;
+}
+
+.timeline h4 {
+    color: #172554;
+    margin-bottom: 5px;
+}
+
+.timeline p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.footer {
+    text-align: center;
+    color: #64748b;
+    font-size: 12px;
+    padding: 25px 0;
+}
+
+.stButton > button {
+    border-radius: 12px;
+    font-weight: 600;
+    min-height: 45px;
+}
+
+div[data-testid="stMetric"] {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid #e2e8f0;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# ==========================================
-# FUNCTIONS
-# ==========================================
-
-def logout():
-    st.session_state.authenticated = False
-    st.session_state.current_user = None
-    st.session_state.screen = "intro"
-    st.rerun()
-
-
-def get_role():
-    if not st.session_state.authenticated:
-        return None
-
-    account = st.session_state.accounts.get(
-        st.session_state.current_user
-    )
-
-    return account["role"] if account else None
-
-
-def is_owner():
-    return get_role() == "Owner"
-
-
-def is_admin():
-    return get_role() in ["Owner", "Administrator"]
-
-
-def show_clock():
-    st.components.v1.html("""
-    <div style="font-family:Arial;text-align:right;">
-        <div id="clock" style="font-size:24px;font-weight:bold;"></div>
-        <div id="date" style="font-size:13px;"></div>
-        <div style="font-size:12px;">
-            Asia/Manila (UTC+08:00)
-        </div>
-    </div>
-
-    <script>
-    function updateClock() {
-        const now = new Date();
-
-        document.getElementById("clock").textContent =
-            new Intl.DateTimeFormat("en-US", {
-                timeZone: "Asia/Manila",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true
-            }).format(now);
-
-        document.getElementById("date").textContent =
-            new Intl.DateTimeFormat("en-US", {
-                timeZone: "Asia/Manila",
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric"
-            }).format(now);
-    }
-
-    updateClock();
-    setInterval(updateClock, 1000);
-    </script>
-    """, height=75)
 
 # ==========================================
-# INTRODUCTION SCREEN
+# SESSION STATE
 # ==========================================
 
-if st.session_state.screen == "intro":
+if "started" not in st.session_state:
+    st.session_state.started = False
+
+if "page" not in st.session_state:
+    st.session_state.page = "Home"
+
+
+# ==========================================
+# PERSONAL INFORMATION
+# ==========================================
+
+NAME = "Gerald Brandon Angus Seriño"
+
+EMAIL = "sgeraldbrandon@gmail.com"
+ALT_EMAIL = "serinogeraldbrandon@gmail.com"
+PHONE = "09976908659"
+
+UNIVERSITY = "North Eastern Mindanao State University"
+CAMPUS = "Bislig Campus"
+COURSE = "Bachelor of Science in Mechanical Engineering"
+YEAR_LEVEL = "Sophomore (2nd Year)"
+SECTION = "BSME-2B"
+
+
+# ==========================================
+# WELCOME SCREEN
+# ==========================================
+
+def welcome_screen():
 
     st.markdown("""
-    <div style="
-        background:#111111;
-        color:white;
-        padding:55px 35px;
-        border-radius:18px;
-        min-height:400px;
-    ">
-        <div style="
-            font-size:14px;
-            letter-spacing:4px;
-            color:#AAAAAA;
-        ">
-            PERSONAL PORTFOLIO
-        </div>
-
-        <br><br>
-
-        <div style="
-            font-size:clamp(32px,6vw,58px);
-            font-weight:700;
-            line-height:1.2;
-        ">
-            Welcome to My<br>
-            Digital Space.
-        </div>
-
+    <div class="hero">
+        <h1>WELCOME</h1>
+        <p>Discover my profile, academic journey, and personal introduction.</p>
         <br>
-
-        <div style="
-            color:#BBBBBB;
-            font-size:18px;
-        ">
-            Learning. Growing. Engineering.
-        </div>
-
-        <br>
-
-        <div style="
-            max-width:600px;
-            color:#CCCCCC;
-            line-height:1.8;
-        ">
-            Discover my academic journey, personal background,
-            and experiences as a Mechanical Engineering student.
-        </div>
-
-        <br><br>
-
-        <div style="
-            font-size:14px;
-            letter-spacing:2px;
-        ">
-            GERALD BRANDON ANGUS SERIÑO
-        </div>
+        <h2>Gerald Brandon Angus Seriño</h2>
+        <p>Aspiring Mechanical Engineer | Student | Future Innovator</p>
     </div>
     """, unsafe_allow_html=True)
-
-    st.write("")
 
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
-
-        if st.button(
-            "ENTER PORTFOLIO",
-            use_container_width=True
-        ):
-
-            st.session_state.screen = "login"
+        if st.button("🚀 GET STARTED", use_container_width=True):
+            st.session_state.started = True
             st.rerun()
 
     st.markdown("""
     <div class="footer">
-        PERSONAL STUDENT PORTFOLIO | 2026
+        Designed and Developed by Gerald Brandon Angus Seriño<br>
+        © 2026 All Rights Reserved
     </div>
     """, unsafe_allow_html=True)
 
 
 # ==========================================
-# LOGIN SCREEN
+# NAVIGATION
 # ==========================================
 
-elif st.session_state.screen == "login":
+def navigation():
 
-    st.title("Account Login")
+    st.sidebar.title("⚙️ GBA SERIÑO")
+    st.sidebar.caption("PERSONAL APPLICATION")
+    st.sidebar.divider()
 
-    st.write("Sign in to access the portfolio.")
+    pages = [
+        "Home",
+        "About Me",
+        "Educational Background",
+        "Developer Profile"
+    ]
 
-    col1, col2, col3 = st.columns([1, 2, 1])
-
-    with col2:
-
-        with st.form("login_form"):
-
-            email = st.text_input(
-                "Email Address"
-            ).lower().strip()
-
-            password = st.text_input(
-                "Password",
-                type="password"
-            )
-
-            login = st.form_submit_button(
-                "Sign In",
-                use_container_width=True
-            )
-
-            if login:
-
-                account = st.session_state.accounts.get(email)
-
-                if account and account["password"] == password:
-
-                    st.session_state.authenticated = True
-
-                    st.session_state.current_user = email
-
-                    st.session_state.screen = "main"
-
-                    st.success("Login successful.")
-
-                    st.rerun()
-
-                else:
-
-                    st.error("Invalid email or password.")
-
-        st.divider()
-
-        st.subheader("New Visitor?")
-
-        if st.button(
-            "Create Viewer Account",
-            use_container_width=True
-        ):
-
-            st.session_state.screen = "register"
-
+    for page in pages:
+        if st.sidebar.button(page, use_container_width=True):
+            st.session_state.page = page
             st.rerun()
 
-        if st.button(
-            "Back to Introduction",
-            use_container_width=True
-        ):
+    st.sidebar.divider()
 
-            st.session_state.screen = "intro"
-
-            st.rerun()
+    if st.sidebar.button("Logout / Welcome Screen",
+                         use_container_width=True):
+        st.session_state.started = False
+        st.session_state.page = "Home"
+        st.rerun()
 
 
 # ==========================================
-# REGISTRATION SCREEN
+# HOME PAGE
 # ==========================================
 
-elif st.session_state.screen == "register":
+def home_page():
 
-    st.title("Create an Account")
+    st.markdown("""
+    <div class="hero">
+        <h1>Hello, Welcome!</h1>
+        <h2>I'm Gerald Brandon Angus Seriño</h2>
+        <p>Welcome to my personal application.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.write(
-        "Register to access the portfolio as a viewer."
+    st.markdown('<div class="section-title">Dashboard</div>',
+                unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("Year Level", "2nd Year")
+    col2.metric("Program", "BSME")
+    col3.metric("Section", "BSME-2B")
+
+    st.markdown("---")
+
+    st.subheader("About This Application")
+
+    st.write("""
+    This application serves as my personal digital profile,
+    showcasing my personal introduction, educational background,
+    academic journey, and developer information.
+
+    Explore the different sections using the navigation menu.
+    """)
+
+
+# ==========================================
+# ABOUT ME
+# ==========================================
+
+def about_page():
+
+    st.markdown('<div class="section-title">About Me</div>',
+                unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <div class="profile-card">
+        <h2 style="color:#172554;">{NAME}</h2>
+        <p style="color:#64748b;">
+        Aspiring Mechanical Engineer | Technology Enthusiast
+        </p>
+        <hr>
+        <p style="color:#334155; line-height:1.9;">
+        Hello! My name is <b>{NAME}</b>. I am currently a sophomore
+        student pursuing a Bachelor of Science in Mechanical
+        Engineering at North Eastern Mindanao State University
+        (NEMSU) - Bislig Campus.
+        <br><br>
+        My academic journey includes elementary education,
+        the Special Program in the Arts (SPA) - Media Arts section
+        during junior high school, and the Science, Technology,
+        Engineering, and Mathematics (STEM) strand during senior
+        high school.
+        <br><br>
+        I am interested in creativity, technology, engineering,
+        innovation, and application development. I enjoy learning
+        new things and exploring ideas that can help me grow
+        academically and personally.
+        <br><br>
+        My goal is to continuously improve my knowledge and
+        abilities while creating meaningful and practical solutions.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ==========================================
+# EDUCATIONAL BACKGROUND
+# ==========================================
+
+def education_page():
+
+    st.markdown(
+        '<div class="section-title">Educational Background</div>',
+        unsafe_allow_html=True
     )
 
-    with st.form("registration_form"):
+    education = [
+        {
+            "level": "Elementary Education",
+            "school": "Mangagoy Hilltop Elementary School",
+            "years": "2013–2019",
+            "details": "Elementary Graduate"
+        },
+        {
+            "level": "Junior High School",
+            "school": "Tabon Maximino Estrella National High School (TMENHS)",
+            "years": "2019–2023",
+            "details": "Section: Special Program in the Arts (SPA) – Media Arts"
+        },
+        {
+            "level": "Senior High School",
+            "school": "Tabon Maximino Estrella National High School (TMENHS)",
+            "years": "2023–2025",
+            "details": "Strand: Science, Technology, Engineering, and Mathematics (STEM)"
+        },
+        {
+            "level": "College Education",
+            "school": "North Eastern Mindanao State University (NEMSU) – Bislig Campus",
+            "years": "2025–Present",
+            "details": "Bachelor of Science in Mechanical Engineering | Sophomore | BSME-2B"
+        }
+    ]
 
-        new_email = st.text_input(
-            "Email Address"
-        ).lower().strip()
+    for item in education:
+        st.markdown(f"""
+        <div class="profile-card">
+            <div class="info-label">{item['years']}</div>
+            <h3 style="color:#172554;">{item['level']}</h3>
+            <p style="color:#334155;font-weight:600;">
+                {item['school']}
+            </p>
+            <p style="color:#64748b;">
+                {item['details']}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-        new_password = st.text_input(
-            "Password",
-            type="password"
-        )
 
-        confirm_password = st.text_input(
-            "Confirm Password",
-            type="password"
-        )
+# ==========================================
+# DEVELOPER PROFILE
+# ==========================================
 
-        register = st.form_submit_button(
-            "Register",
-            use_container_width=True
-        )
+def developer_page():
 
-        if register:
+    st.markdown(
+        '<div class="section-title">Developer Profile</div>',
+        unsafe_allow_html=True
+    )
 
-            if not new_email or not new_password:
+    st.markdown(f"""
+    <div class="profile-card">
+        <h2 style="color:#172554;">{NAME}</h2>
+        <p style="color:#64748b;">Application Owner and Developer</p>
+        <hr>
+        <div class="info-label">University</div>
+        <p class="info-value">{UNIVERSITY}</p>
 
-                st.error("Please complete all fields.")
+        <div class="info-label">Campus</div>
+        <p class="info-value">{CAMPUS}</p>
 
-            elif len(new_password) < 10:
+        <div class="info-label">Program</div>
+        <p class="info-value">{COURSE}</p>
 
-                st.error(
-                    "Password must contain at least 10 characters."
-                )
+        <div class="info-label">Year Level</div>
+        <p class="info-value">{YEAR_LEVEL}</p>
 
-            elif new_password != confirm_password:
+        <div class="info-label">Section</div>
+        <p class="info-value">{SECTION}</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-                st.error("Passwords do not match.")
+    st.subheader("Contact Information")
 
-            elif new_email in st.session_state.accounts:
+    st.write(f"📧 Primary Email: {EMAIL}")
+    st.write(f"📧 Alternative Email: {ALT_EMAIL}")
+    st.write(f"📱 Contact Number: {PHONE}")
 
-                st.error("This account already exists.")
 
-            else:
-
-                st.session_state.accounts[new_email] = {
-                    "password": new_password,
-                    "role": "Viewer"
-                }
-
-                st.success(
-                    "Account created successfully. You can now log in."
-                )
-
-    if st.button("Back to Login"):
-
-        st.session_state.screen = "login"
-
-        st.rerun()
 # ==========================================
 # MAIN APPLICATION
 # ==========================================
 
-elif st.session_state.screen == "main":
+if not st.session_state.started:
 
-    # Verify login
-    if not st.session_state.authenticated:
-        st.session_state.screen = "intro"
-        st.rerun()
+    welcome_screen()
 
-    current_role = get_role()
+else:
 
-    if current_role is None:
-        logout()
+    navigation()
 
-    # ======================================
-    # VERTICAL SIDEBAR
-    # ======================================
+    if st.session_state.page == "Home":
+        home_page()
 
-    with st.sidebar:
+    elif st.session_state.page == "About Me":
+        about_page()
 
-        st.markdown("## GERALD.")
+    elif st.session_state.page == "Educational Background":
+        education_page()
 
-        st.caption("PERSONAL PORTFOLIO")
-
-        st.divider()
-
-        st.markdown("### NAVIGATION")
-
-        pages = [
-            "Home",
-            "About Developer"
-        ]
-
-        if is_admin():
-            pages.append("Settings")
-
-        if is_owner():
-            pages.append("Administration")
-
-        page = st.radio(
-            "Select a page",
-            pages,
-            label_visibility="collapsed"
-        )
-
-        st.divider()
-
-        st.markdown("### ACCOUNT")
-
-        st.write(
-            st.session_state.current_user
-        )
-
-        st.caption(
-            "Role: " + current_role
-        )
-
-        st.divider()
-
-        # PROFILE PICTURE
-
-        if st.session_state.profile_picture:
-
-            st.image(
-                st.session_state.profile_picture,
-                width=130
-            )
-
-        st.markdown(
-            "**" + st.session_state.profile_name + "**"
-        )
-
-        st.caption(SECTION)
-
-        st.divider()
-
-        # LOGOUT
-
-        if st.button(
-            "Logout",
-            use_container_width=True
-        ):
-
-            logout()
-
-    # ======================================
-    # MAIN HEADER
-    # ======================================
-
-    header_col, clock_col = st.columns([3, 1])
-
-    with header_col:
-
-        st.title("GERALD'S PORTFOLIO")
-
-        st.caption(
-            "A journey of learning, growth, and engineering."
-        )
-
-    with clock_col:
-
-        show_clock()
-
-    st.divider()
-
-    # ======================================
-    # HOME PAGE
-    # ======================================
-
-    if page == "Home":
-
-        st.title("Home")
-
-        st.write(
-            f"Welcome, {st.session_state.profile_name}."
-        )
-
-        st.write(
-            "Explore my personal information and academic journey."
-        )
-
-        st.divider()
-
-        col1, col2 = st.columns([1, 2])
-
-        with col1:
-
-            if st.session_state.profile_picture:
-
-                st.image(
-                    st.session_state.profile_picture,
-                    width=200
-                )
-
-            else:
-
-                st.info(
-                    "Profile picture not yet uploaded."
-                )
-
-        with col2:
-
-            st.header(st.session_state.profile_name)
-
-            st.write(
-                "Mechanical Engineering Student"
-            )
-
-            st.write(UNIVERSITY)
-
-            st.success(
-                YEAR_LEVEL + " | " + SECTION
-            )
-
-        st.divider()
-
-        st.header("Academic Overview")
-
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-
-            with st.container(border=True):
-
-                st.caption("YEAR LEVEL")
-
-                st.subheader("2nd Year")
-
-        with col2:
-
-            with st.container(border=True):
-
-                st.caption("PROGRAM")
-
-                st.subheader("BSME")
-
-        with col3:
-
-            with st.container(border=True):
-
-                st.caption("SECTION")
-
-                st.subheader("BSME 2B")
-
-        st.divider()
-
-        st.header("About This Portfolio")
-
-        st.write("""
-        This application presents my personal background,
-        educational achievements, and journey as a
-        Mechanical Engineering student.
-
-        It serves as a digital representation of my
-        academic development and personal growth.
-        """)
-
-    # ======================================
-    # ABOUT DEVELOPER PAGE
-    # ======================================
-
-    elif page == "About Developer":
-
-        st.title("About Developer")
-
-        st.write(
-            "Get to know the person behind this application."
-        )
-
-        st.divider()
-
-        col1, col2 = st.columns([1, 2])
-
-        with col1:
-
-            if st.session_state.profile_picture:
-
-                st.image(
-                    st.session_state.profile_picture,
-                    width=220
-                )
-
-        with col2:
-
-            st.header(st.session_state.profile_name)
-
-            st.write(PROGRAM)
-
-            st.write(UNIVERSITY)
-
-            st.write(
-                "Year Level: " + YEAR_LEVEL
-            )
-
-            st.write(
-                "Section: " + SECTION
-            )
-
-        st.divider()
-
-        st.header("Personal Information")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-
-            st.write("**Full Name**")
-
-            st.write(st.session_state.profile_name)
-
-            st.write("**Email Address**")
-
-            st.write(st.session_state.profile_email)
-
-        with col2:
-
-            st.write("**Birthday**")
-
-            st.write(BIRTHDAY)
-
-            st.write("**Program**")
-
-            st.write(PROGRAM)
-
-        st.divider()
-
-        st.header("Educational Background")
-
-        education = [
-            {
-                "level": "Elementary Education",
-                "school": "Mangagoy Hilltop Elementary School",
-                "years": "2013 - 2019"
-            },
-            {
-                "level": "Junior High School",
-                "school": "Tabon Maximino Estrella National High School",
-                "years": "2019 - 2023"
-            },
-            {
-                "level": "Senior High School",
-                "school": "Tabon Maximino Estrella National High School",
-                "years": "2023 - 2025"
-            },
-            {
-                "level": "College Education",
-                "school": UNIVERSITY,
-                "years": "2025 - Present"
-            }
-        ]
-
-        for item in education:
-
-            with st.container(border=True):
-
-                st.subheader(item["level"])
-
-                st.write(
-                    "**School:** " + item["school"]
-                )
-
-                st.write(
-                    "**Years:** " + item["years"]
-                )
-
-        st.divider()
-
-        st.header("Academic Information")
-
-        st.write("**University:** " + UNIVERSITY)
-
-        st.write("**Program:** " + PROGRAM)
-
-        st.write("**Year Level:** " + YEAR_LEVEL)
-
-        st.write("**Section:** " + SECTION)
-
-        st.divider()
-
-        st.caption(
-            "Developed by Gerald Brandon Angus Seriño."
-        )
-
-    # ======================================
-    # FOOTER
-    # ======================================
-
-    st.divider()
+    elif st.session_state.page == "Developer Profile":
+        developer_page()
 
     st.markdown("""
     <div class="footer">
-        Developed by Gerald Brandon Angus Seriño
-        <br>
-        Personal Student Portfolio | 2026
+        Developed by Gerald Brandon Angus Seriño<br>
+        © 2026 All Rights Reserved
     </div>
     """, unsafe_allow_html=True)
-# ==========================================
-# SETTINGS PAGE
-# ==========================================
-
-elif page == "Settings":
-
-        if not is_admin():
-
-            st.error("You are not authorized to access Settings.")
-
-            st.stop()
-
-        st.title("Settings")
-
-        st.write(
-            "Manage your portfolio appearance and information."
-        )
-
-        st.divider()
-
-        # --------------------------------------
-        # APPEARANCE SETTINGS
-        # --------------------------------------
-
-        st.header("Appearance")
-
-        selected_theme = st.selectbox(
-            "Choose Application Theme",
-            ["Light", "Dark", "Gray", "OLED Black"],
-            index=[
-                "Light",
-                "Dark",
-                "Gray",
-                "OLED Black"
-            ].index(st.session_state.theme)
-        )
-
-        if st.button("Apply Theme"):
-
-            st.session_state.theme = selected_theme
-
-            st.success("Theme updated.")
-
-            st.rerun()
-
-        st.divider()
-
-        # --------------------------------------
-        # PROFILE SETTINGS
-        # --------------------------------------
-
-        st.header("Edit Developer Profile")
-
-        with st.form("edit_profile"):
-
-            edited_name = st.text_input(
-                "Full Name",
-                value=st.session_state.profile_name
-            )
-
-            edited_email = st.text_input(
-                "Email Address",
-                value=st.session_state.profile_email
-            )
-
-            save_profile = st.form_submit_button(
-                "Save Profile"
-            )
-
-            if save_profile:
-
-                if edited_name.strip() and edited_email.strip():
-
-                    st.session_state.profile_name = (
-                        edited_name.strip()
-                    )
-
-                    st.session_state.profile_email = (
-                        edited_email.strip()
-                    )
-
-                    st.success("Profile updated.")
-
-                    st.rerun()
-
-                else:
-
-                    st.error(
-                        "Please complete all fields."
-                    )
-
-        st.divider()
-
-        # --------------------------------------
-        # PROFILE PICTURE
-        # --------------------------------------
-
-        st.header("Profile Picture")
-
-        uploaded_picture = st.file_uploader(
-            "Upload a new profile picture",
-            type=["jpg", "jpeg", "png"]
-        )
-
-        if uploaded_picture:
-
-            st.image(
-                uploaded_picture,
-                width=180
-            )
-
-            if st.button("Save Profile Picture"):
-
-                st.session_state.profile_picture = (
-                    uploaded_picture.getvalue()
-                )
-
-                st.success(
-                    "Profile picture updated successfully."
-                )
-
-                st.rerun()
-
-        st.divider()
-
-        # --------------------------------------
-        # APPLICATION INFORMATION
-        # --------------------------------------
-
-        st.header("Application Information")
-
-        st.write(
-            "**Application:** Gerald's Personal Portfolio"
-        )
-
-        st.write("**Version:** 1.0.0")
-
-        st.write(
-            "**Developer:** Gerald Brandon Angus Seriño"
-        )
-
-        st.write("**University:** " + UNIVERSITY)
-
-
-# ==========================================
-# ADMINISTRATION PAGE
-# OWNER ONLY
-# ==========================================
-
-elif page == "Administration":
-
-        if not is_owner():
-
-            st.error(
-                "Only the Owner can access Administration."
-            )
-
-            st.stop()
-
-        st.title("Administration")
-
-        st.write(
-            "Manage registered accounts and administrator permissions."
-        )
-
-        st.divider()
-
-        # --------------------------------------
-        # ACCOUNT OVERVIEW
-        # --------------------------------------
-
-        st.header("Account Overview")
-
-        total_accounts = len(
-            st.session_state.accounts
-        )
-
-        total_admins = sum(
-            1
-            for account in st.session_state.accounts.values()
-            if account["role"] == "Administrator"
-        )
-
-        total_viewers = sum(
-            1
-            for account in st.session_state.accounts.values()
-            if account["role"] == "Viewer"
-        )
-
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-
-            st.metric(
-                "Total Accounts",
-                total_accounts
-            )
-
-        with col2:
-
-            st.metric(
-                "Administrators",
-                total_admins
-            )
-
-        with col3:
-
-            st.metric(
-                "Viewers",
-                total_viewers
-            )
-
-        st.divider()
-
-        # --------------------------------------
-        # REGISTERED ACCOUNTS
-        # --------------------------------------
-
-        st.header("Registered Accounts")
-
-        for email, account in st.session_state.accounts.items():
-
-            with st.container(border=True):
-
-                col1, col2 = st.columns([3, 1])
-
-                with col1:
-
-                    st.write("**" + email + "**")
-
-                    st.caption(
-                        "Role: " + account["role"]
-                    )
-
-                with col2:
-
-                    if account["role"] == "Owner":
-
-                        st.success("Owner")
-
-                    elif account["role"] == "Administrator":
-
-                        st.info("Administrator")
-
-                    else:
-
-                        st.write("Viewer")
-
-        st.divider()
-
-        # --------------------------------------
-        # ASSIGN ADMINISTRATOR
-        # --------------------------------------
-
-        st.header("Administrator Management")
-
-        available_accounts = [
-            email
-            for email, account in st.session_state.accounts.items()
-            if account["role"] != "Owner"
-        ]
-
-        if available_accounts:
-
-            selected_account = st.selectbox(
-                "Select an account",
-                available_accounts,
-                key="admin_selected_account"
-            )
-
-            selected_role = st.session_state.accounts[
-                selected_account
-            ]["role"]
-
-            st.write(
-                "Current role: " + selected_role
-            )
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-
-                if st.button(
-                    "Promote to Administrator",
-                    use_container_width=True
-                ):
-
-                    st.session_state.accounts[
-                        selected_account
-                    ]["role"] = "Administrator"
-
-                    st.success(
-                        "Administrator role assigned."
-                    )
-
-                    st.rerun()
-
-            with col2:
-
-                if st.button(
-                    "Change to Viewer",
-                    use_container_width=True
-                ):
-
-                    st.session_state.accounts[
-                        selected_account
-                    ]["role"] = "Viewer"
-
-                    st.success(
-                        "Viewer permissions restored."
-                    )
-
-                    st.rerun()
-
-        else:
-
-            st.info(
-                "No additional accounts are registered yet."
-            )
-
-        st.divider()
-
-        # --------------------------------------
-        # PERMISSION INFORMATION
-        # --------------------------------------
-
-        st.header("Role Permissions")
-
-        st.write("""
-        **OWNER**
-        - Complete application access.
-        - Manage administrators.
-        - Manage visitor accounts.
-        - Edit developer profile.
-        - Change application settings.
-
-        **ADMINISTRATOR**
-        - Access Settings.
-        - Edit developer profile.
-        - Upload profile pictures.
-        - Change application themes.
-        - Cannot appoint administrators.
-
-        **VIEWER**
-        - Access Home.
-        - Access About Developer.
-        - Cannot edit portfolio information.
-        - Cannot access administrative settings.
-        """)
-
-        st.divider()
-
-        st.caption(
-            "Administrator privileges are controlled by the Owner."
-        )
-
-# ==========================================
-# END OF APPLICATION
-# ==========================================
