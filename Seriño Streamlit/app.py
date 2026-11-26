@@ -192,7 +192,7 @@ def welcome_screen():
 
 def navigation():
 
-    st.sidebar.title("⚙️ GBA SERIÑO")
+    st.sidebar.title("⚙️ The Engineer's Hub")
     st.sidebar.caption("PERSONAL APPLICATION")
     st.sidebar.divider()
 
