@@ -910,7 +910,7 @@ elif page == "Settings":
 # OWNER ONLY
 # ==========================================
 
-    elif page == "Administration":
+elif page == "Administration":
 
         if not is_owner():
 
