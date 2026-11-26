@@ -137,15 +137,15 @@ if "started" not in st.session_state:
 if "page" not in st.session_state:
     st.session_state.page = "Home"
 
-
 # ==========================================
 # PERSONAL INFORMATION
 # ==========================================
 
 NAME = "Gerald Brandon Angus Seriño"
 
-EMAIL = "sgeraldbrandon@gmail.com"
-ALT_EMAIL = "serinogeraldbrandon@gmail.com"
+EMAIL = "serinogeraldbrandon@gmail.com"
+ALT_EMAIL = "sgeraldbrandon@gmail.com"
+
 PHONE = "09976908659"
 
 UNIVERSITY = "North Eastern Mindanao State University"
