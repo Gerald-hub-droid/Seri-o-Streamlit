@@ -123,9 +123,68 @@ div[data-testid="stMetric"] {
     border-radius: 15px;
     border: 1px solid #e2e8f0;
 }
+
+/* ==========================================
+   SIDEBAR DESIGN
+========================================== */
+
+section[data-testid="stSidebar"] {
+    background: linear-gradient(
+        180deg,
+        #0f172a 0%,
+        #172554 55%,
+        #1e3a5f 100%
+    );
+}
+
+/* SIDEBAR TEXT */
+
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] label {
+    color: #e2e8f0;
+}
+
+/* SIDEBAR TITLE */
+
+section[data-testid="stSidebar"] h1 {
+    color: #ffffff;
+    font-weight: 800;
+}
+
+/* SIDEBAR CAPTION */
+
+section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    color: #93c5fd;
+}
+
+/* NAVIGATION BUTTONS */
+
+section[data-testid="stSidebar"] .stButton > button {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border: 1px solid rgba(147, 197, 253, 0.25);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+/* BUTTON HOVER EFFECT */
+
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border: 1px solid #60a5fa;
+    transform: translateX(4px);
+}
+
+/* SIDEBAR DIVIDER */
+
+section[data-testid="stSidebar"] hr {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
 </style>
 """, unsafe_allow_html=True)
-
 
 # ==========================================
 # SESSION STATE
